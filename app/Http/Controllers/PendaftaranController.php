@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pendaftaran;
+use App\Models\Poli;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PendaftaranController extends Controller
 {
@@ -32,13 +34,33 @@ class PendaftaranController extends Controller
             'tanggal_daftar' => 'sometimes|date', 
         ]);
 
-        $pendaftaran = Pendaftaran::create($validated);
+        DB::beginTransaction();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Pendaftaran berhasil dibuat',
-            'data' => $pendaftaran->load(['pasien', 'poli', 'dokter'])
-        ], 201);
+        try {
+            $poli = Poli::findOrFail($validated['poli_id']);
+            if ($poli->kuota <= 0) {
+                throw new \Exception("Kuota untuk poli ini sudah habis.");
+            }
+            $poli->decrement('kuota'); 
+            $dataPendaftaran = Pendaftaran::create($validated);
+        
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pendaftaran berhasil dibuat',
+                'data'    => $dataPendaftaran->load(['pasien', 'poli', 'dokter']), 
+            ], 201);
+
+        } catch (\Exception $e) {
+            
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal melakukan pendaftaran: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
