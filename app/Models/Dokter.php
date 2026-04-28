@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Poli extends Model
+class Dokter extends Model
 {
-    protected $table = 'poli';
+    protected $table = 'dokter';
 
     protected $fillable = [
-        'nama_poli',
-        'kuota',
+        'nama_dokter',
     ];
 
     public function pendaftaran() 

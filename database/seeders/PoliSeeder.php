@@ -24,7 +24,7 @@ class PoliSeeder extends Seeder
         ]);
         
         Poli::create([
-            'nama_poli' => 'Poli Mata',
+            'nama_poli' => 'Poli Anak',
             'kuota' => 15
         ]);
     }
